@@ -1,0 +1,30 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2em;
+}
+
+.section {
+  gap: 10px;
+  border: 1px solid #000;
+  padding: 2em;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.uploadInput {
+  cursor: pointer;
+}
+
+.actionButton {
+  width: 100%;
+  padding: 1em;
+  border: 1px solid #000;
+  border-radius: 0.5em;
+  cursor: pointer;
+}

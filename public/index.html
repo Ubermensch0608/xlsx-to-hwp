@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XLSX to HWP Converter</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <form class="section form">
+        <h2>파일 업로드</h2>
+
+        <label for="xlsxFile">
+          <span>XLSX File</span>
+          <input
+            class="uploadInput"
+            type="file"
+            name="xlsxFile"
+            accept=".xls,.xlsx"
+          />
+        </label>
+        <label for="hwpFile">
+          <span>HWP File</span>
+          <input class="uploadInput" type="file" name="hwpFile" accept=".hwp" />
+        </label>
+        <button class="actionButton" type="submit">변환</button>
+      </form>
+      <div class="section">
+        <h2>변환 결과</h2>
+        <button class="actionButton">다운로드</button>
+      </div>
+    </div>
+    <script></script>
+  </body>
+</html>
