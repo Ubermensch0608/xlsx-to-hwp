@@ -8,7 +8,7 @@
   </head>
   <body>
     <div class="container">
-      <form class="section form">
+      <form class="section form" id="form">
         <h2>파일 업로드</h2>
 
         <label for="xlsxFile">
@@ -31,6 +31,21 @@
         <button class="actionButton">다운로드</button>
       </div>
     </div>
-    <script></script>
+    <script>
+      const form = document.querySelector("#form");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const response = await fetch("/convert", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        console.log(data, "response data");
+      });
+    </script>
   </body>
 </html>
