@@ -1,6 +1,8 @@
 import express, { NextFunction } from "express";
 import path from "path";
 import multer from "multer";
+import xlsx from "xlsx";
+import fs from "fs";
 
 const app = express();
 
@@ -25,10 +27,27 @@ app.get("/", (req, res) => {
 });
 
 app.post("/convert", upload.any(), (req, res) => {
-  console.log(req.files, "req.files");
-  console.log(req.body, "req.body");
+  if (!req.files) {
+    return res.status(400).json({ message: "파일이 없습니다." });
+  }
 
-  res.json(req.files);
+  const excelFile = Object.values(req.files).find(
+    (file) => file.fieldname === "xlsxFile"
+  );
+
+  const targetExcel = xlsx.readFile(excelFile.path);
+  const sheetName = targetExcel.SheetNames[0]; // 첫 번째 시트 기준
+  const worksheet = targetExcel.Sheets[sheetName];
+  const jsonData = xlsx.utils.sheet_to_json(worksheet);
+
+  res.json(jsonData);
+
+  if (req.files) {
+    for (const file of Object.values(req.files)) {
+      // 임시 파일 삭제
+      fs.unlinkSync(file.path);
+    }
+  }
 });
 
 app.listen(3000, () => {
