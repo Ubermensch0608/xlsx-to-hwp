@@ -12,3 +12,12 @@ output/
 .env.development
 .env.test
 .env.production
+
+# python
+__pycache__/
+
+# vscode
+.vscode/
+
+# pycache
+__pycache__/
