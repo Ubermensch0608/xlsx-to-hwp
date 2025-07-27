@@ -2,6 +2,10 @@ node_modules
 uploads/
 input/
 output/
+.venv/
+build/
+dist/
+.spec
 
 .env
 .DS_Store
