@@ -41,49 +41,6 @@ def export_excel_data():
         excel.Quit()
         del excel
 
-def insert_image_to_table_cell(hwp, table_name, row, col, image_path):
-    hwp.MovePos(3)
-    ctrl_count = hwp.GetCtrlCount()
-    print(f"📦 컨트롤 개수: {ctrl_count}")
-
-     # FindCtrl 초기화
-    table_index = 0
-    while True:
-        try:
-            hwp.HAction.GetDefault("FindCtrl", hwp.HParameterSet.HFindCtrl)
-            found = hwp.HAction.Execute("FindCtrl", hwp.HParameterSet.HFindCtrl)
-
-            if not found:
-                break
-
-            ctrl_name = hwp.HParameterSet.HFindCtrl.HCName
-            ctrl_type = hwp.HParameterSet.HFindCtrl.HCType
-
-            if ctrl_type != "tbl":
-                continue  # 표가 아니면 스킵
-
-            table_index += 1
-            print(f"📋 [{table_index}] 표 발견: {ctrl_name}")
-
-            # 표 셀 선택
-            hwp.HAction.GetDefault("TableSelCell", hwp.HParameterSet.HTableSelCell)
-            hwp.HParameterSet.HTableSelCell.TblIdx = 1  # 현재 선택된 표 기준
-            hwp.HParameterSet.HTableSelCell.Row = 2
-            hwp.HParameterSet.HTableSelCell.Col = 1
-            hwp.HAction.Execute("TableSelCell", hwp.HParameterSet.HTableSelCell)
-
-            # 이미지 삽입
-            hwp.HAction.GetDefault("InsertPicture", hwp.HParameterSet.HInsertPicture.HSet)
-            hwp.HParameterSet.HInsertPicture.filename = os.path.abspath(image_path)
-            hwp.HParameterSet.HInsertPicture.KeepAspectRatio = 1
-            hwp.HAction.Execute("InsertPicture", hwp.HParameterSet.HInsertPicture.HSet)
-            print(f"✅ 이미지 삽입 완료 (표 {table_index})")
-        
-        except Exception as e:
-            print(f"❌ 이미지 삽입 실패: {e}")
-            sys.exit(1)
-
-
 def insert_image_to_each_table(image_path, input_hwp_path, output_hwp_path):
     hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject.2")
     hwp.RegisterModule("FilePathCheckDLL", "FilePathCheckerModuleExample")
@@ -91,10 +48,57 @@ def insert_image_to_each_table(image_path, input_hwp_path, output_hwp_path):
     hwp.Open(os.path.abspath(input_hwp_path))
     hwp.MovePos(3)  # 문서 처음으로 이동 
 
+
+    head_ctrl = hwp.HeadCtrl
+    found_table = False
+
+    image_files = [
+        f for f in os.listdir(image_path)
+        if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))
+    ]
+
+    for image_file in image_files:
+            image_name = os.path.splitext(image_file)[0]
+            if(image_name == "1번(취미)_1"):
+                image_name = "규칙적인 여가 및 취미활동에 대한 결과"
+
+            try:
+                # 텍스트 검색
+                hwp.HAction.GetDefault("RepeatFind", hwp.HParameterSet.HFindReplace.HSet)
+                hwp.HParameterSet.HFindReplace.HSet.SetItem("FindString", image_name)
+                hwp.HParameterSet.HFindReplace.HSet.SetItem("Direction", 1)
+                hwp.HParameterSet.HFindReplace.HSet.SetItem("FindType", 1)
+                found = hwp.HAction.Execute("RepeatFind", hwp.HParameterSet.HFindReplace.HSet)
+
+                if not found:
+                    print(f"❌ [{image_name}] 텍스트를 문서에서 찾지 못했습니다.")
+                    continue
+
+                ctrl = hwp.ParentCtrl
+                if ctrl.CtrlID != "tbl":
+                    print(f"⚠️ [{image_name}] 텍스트는 찾았지만 표 안이 아닙니다.")
+                    continue
+
+                # 표의 첫 번째 셀 선택
+                hwp.MoveToField(image_name, True, True, False)
+                # 현재 캐럿이 위치한 셀에서 열(column)의 시작
+                hwp.MovePos(106)
+                hwp.InsertPicture(os.path.join(image_path, image_file), True, 2)
+
+                print(f"✅ [{image_name}] 표에 이미지 삽입 완료")
+                found_table = True
+
+            except Exception as e:
+                print(f"⚠️ [{image_name}] 처리 중 오류 발생: {e}")
+
+    if not found_table:
+        print("🔍 문서 내 표를 찾지 못했거나 삽입할 수 없었습니다.")
+
     # 저장
     hwp.SaveAs(os.path.abspath(output_hwp_path))
     hwp.Quit()
-    print(f"🎉 완료! 저장된 파일: {output_hwp_path}")
+    del hwp
+    print(f"💾 작업 완료. 저장 경로: {output_hwp_path}")
 
 
 def insert_data_to_hwp():
