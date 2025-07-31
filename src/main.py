@@ -57,10 +57,39 @@ def insert_image_to_each_table(image_path, input_hwp_path, output_hwp_path):
         if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))
     ]
 
+    # 이미지 파일 목록 참조 (/output)
     for image_file in image_files:
             image_name = os.path.splitext(image_file)[0]
             if(image_name == "1번(취미)_1"):
                 image_name = "규칙적인 여가 및 취미활동에 대한 결과"
+            if(image_name == "2번(가사노동)_1"):
+                image_name = "[하루 평균 가사노동시간에 대한 결과]"
+            if(image_name == "3번(질병유무)_1"):
+                image_name = "[질병 진단에 대한 결과]"
+            if(image_name == "3-1번(질병유무, 질병종류)_1"):
+                image_name = "[진단받은 질병명에 대한 결과]"
+            if(image_name == "4번(사고)_1"):
+                image_name = "[운동 중 혹은 사고로 신체 부위를 다친 적이 있는가에 대한 결과]"
+            if(image_name == "4-1번(사고, 신체부위)_1"):
+                image_name = "[운동 중 혹은 사고로 다친 신체 부위에 대한 결과]"
+            if(image_name == "5번(장애)_1"):
+                image_name = "[일의 육체적 부담 정도에 대한 결과]"
+            if(image_name == "6번(근골증상여부)_1"):
+                image_name = "[작업과 관련하여 통증이나 불편함을 느낀 적이 있는가에 대한 결과]"
+            if(image_name == "6-1번(근골, 신체부위)_1"):
+                image_name = "[통증의 구체적 부위에 대한 결과]"
+            if(image_name == "6-2번(통증기간지속)_1"):
+                image_name = "[통증의 지속 기간에 대한 결과]"
+            if(image_name == "6-3번(통증정도)_1"):
+                image_name = "[통증의 정도에 대한 결과]"
+            if(image_name == "6-4번(통증빈도)_1"):
+                image_name = "[통증의 빈도에 대한 결과]"
+            if(image_name == "6-5번(지난1주일증상여부)_1"):
+                image_name = "[지난 1주일 동안 통증의 여부에 대한 결과]"
+            if(image_name == "6-6번(통증어떤일)_1"):
+                image_name = "[지난 1년 동안 통증으로 인해 발생한 일에 대한 결과]"
+            if(image_name == "6-7번(증상자분류)_1"):
+                image_name = "[근골격계질환 요주의자/유소견자 추정에 대한 결과]"
 
             try:
                 # 텍스트 검색
