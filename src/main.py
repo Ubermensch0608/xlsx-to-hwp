@@ -58,8 +58,12 @@ def insert_image_to_each_table(image_path, input_hwp_path, output_hwp_path):
     # 이미지 파일 목록 참조 (/output)
     for image_file in image_files:
             image_name = os.path.splitext(image_file)[0]
+            image_width = 150.49
+            image_height = 103.29
             if(image_name == "1번(취미)_1"):
                 image_name = "[규칙적인 여가 및 취미활동에 대한 결과]"
+                image_width = 149.22
+                image_height = 90.59
             if(image_name == "2번(가사노동)_1"):
                 image_name = "[하루 평균 가사노동시간에 대한 결과]"
             if(image_name == "3번(질병유무)_1"):
@@ -78,16 +82,28 @@ def insert_image_to_each_table(image_path, input_hwp_path, output_hwp_path):
                 image_name = "[통증의 구체적 부위에 대한 결과]"
             if(image_name == "6-2번(통증기간지속)_1"):
                 image_name = "[통증의 지속 기간에 대한 결과]"
+                image_width = 160.41
+                image_height = 95.22
             if(image_name == "6-3번(통증정도)_1"):
                 image_name = "[통증의 정도에 대한 결과]"
+                image_width = 160.41
+                image_height = 96.37
             if(image_name == "6-4번(통증빈도)_1"):
                 image_name = "[통증의 빈도에 대한 결과]"
+                image_width = 160.41
+                image_height = 97.01
             if(image_name == "6-5번(지난1주일증상여부)_1"):
                 image_name = "[지난 1주일 동안 통증의 여부에 대한 결과]"
+                image_width = 160.41
+                image_height = 96.60
             if(image_name == "6-6번(통증어떤일)_1"):
                 image_name = "[지난 1년 동안 통증으로 인해 발생한 일에 대한 결과]"
+                image_width = 160.41
+                image_height = 96.78
             if(image_name == "6-7번(증상자분류)_2"):
                 image_name = "[근골격계질환 요주의자/유소견자 추정에 대한 결과]"
+                image_width = 127.63
+                image_height = 62.41
 
             try:
                 # 텍스트 검색
@@ -98,21 +114,24 @@ def insert_image_to_each_table(image_path, input_hwp_path, output_hwp_path):
                 hwp.HParameterSet.HFindReplace.HSet.SetItem("FindType", 1)
                 found = hwp.HAction.Execute("RepeatFind", hwp.HParameterSet.HFindReplace.HSet)
 
-
                 if not found:
-                    print(f"❌ [{image_name}] 텍스트를 문서에서 찾지 못했습니다.")
+                    print(f"❌ {image_name} 텍스트를 문서에서 찾지 못했습니다.")
                     continue
 
                 ctrl = hwp.ParentCtrl
                 if ctrl.CtrlID != "tbl":
-                    print(f"⚠️ [{image_name}] 텍스트는 찾았지만 표 안이 아닙니다.")
+                    print(f"⚠️ {image_name} 텍스트는 찾았지만 표 안이 아닙니다.")
                     continue
 
                 # 표의 첫 번째 셀 선택
                 hwp.MoveToField(image_name, True, True, False)
                 # 현재 캐럿이 위치한 셀에서 열(column)의 시작
                 hwp.MovePos(106)
-                hwp.InsertPicture(os.path.join(image_path, image_file), True, 1)
+                # 기존 이미지 선택 및 width, height 얻기
+                # img_height = hwp.GetObjectHeight()
+                # img_width = hwp.GetObjectWidth()
+                
+                hwp.InsertPicture(os.path.join(image_path, image_file), True, 1, False, False, 0, image_width, image_height)
 
                 print(f"✅ [{image_name}] 표에 이미지 삽입 완료")
                 found_table = True
