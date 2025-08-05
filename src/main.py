@@ -21,6 +21,49 @@ def export_excel_data():
     workbook = excel.Workbooks.Open(xlsx_path)
     sheet = workbook.Sheets(1)
 
+    # 시트별 범위 설정 (시트 인덱스 또는 시트 이름을 키로 사용)
+   # 시트별 row 범위 설정 (시트 인덱스 기준)
+    sheet_rows = {
+        1: {'start_row': 0, 'end_row': 0},
+        2: {'start_row': 12, 'end_row': 16},
+        3: {'start_row': 12, 'end_row': 16},
+        4: {'start_row': 9, 'end_row': 10},
+        5: {'start_row': 12, 'end_row': 16},
+        6: {'start_row': 9, 'end_row': 10},
+        7: {'start_row': 13, 'end_row': 18},
+        8: {'start_row': 12, 'end_row': 16},
+        9: {'start_row': 9, 'end_row': 10},
+        10: {'start_row': 13, 'end_row': 18}
+    }
+
+    # 고정된 열 정보
+    start_col = 3 # C열
+    num_cols = 4
+
+    all_data = {}
+
+    for sheet_index, row_config in sheet_rows.items():
+        if sheet_index == 1:
+            continue
+        sheet = workbook.Sheets(sheet_index)
+        sheet_name = sheet.Name
+
+        data = []
+        for row in range(row_config['start_row'], row_config['end_row'] + 1):
+            row_data = []
+            for col in range(start_col, start_col + num_cols):
+                value = sheet.Cells(row, col).Value
+                row_data.append(value)
+            data.append(row_data)
+
+        all_data[sheet_name] = data
+
+    # 결과 출력
+    # for sheet_name, data in all_data.items():
+    #    print(f"[{sheet_name}] 데이터:")
+    #    for row in data:
+    #        print(row)
+
     try:
         for sheet_index, sheet in enumerate(workbook.Sheets):
             chart_count = sheet.ChartObjects().Count
@@ -41,8 +84,9 @@ def export_excel_data():
         workbook.Close(SaveChanges=False)
         excel.Quit()
         del excel
+        return all_data
 
-def insert_image_to_each_table(image_path, input_hwp_path, output_hwp_path):
+def insert_image_to_each_table(image_path, input_hwp_path, output_hwp_path, tableDict):
     hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject.2")
     hwp.RegisterModule("FilePathCheckDLL", "FilePathCheckerModuleExample")
 
@@ -54,7 +98,40 @@ def insert_image_to_each_table(image_path, input_hwp_path, output_hwp_path):
         f for f in os.listdir(image_path)
         if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))
     ]
+    
+    ctrl = hwp.HeadCtrl
+    while ctrl:
+        if ctrl.CtrlID == "tbl":
+            print(dir(ctrl))
 
+            # 표의 첫 번째 행을 헤더로 추출
+            # header = []
+            # for col in range(0, table.CellCountInRow(0)):
+            #     cell = table.Cell(0, col)
+            #     text = cell.GetText()
+            #     header.append(text.strip())
+
+            # 헤더 중 하나라도 dict의 키와 일치하면 삽입 대상
+            # for sheet_name, rows in tableDict.items():
+            #     for row_data in rows:
+            #         if not isinstance(row_data, list) or len(row_data) == 0:
+            #             continue
+
+            #         if any(key in header for key in tableDict.keys()):
+            #             # 데이터 삽입 (헤더 이름 기준으로 매칭된 컬럼에 삽입)
+            #             for data_row in rows:
+            #                 target_row = table.RowCount  # 기존 아래에 추가할 수도 있음
+            #                 for idx, head in enumerate(header):
+            #                     if head in tableDict[sheet_name][0]:
+            #                         col_index = tableDict[sheet_name][0].index(head)
+            #                         try:
+            #                             value = str(data_row[col_index])
+            #                             table.Cell(target_row, idx).SetText(value)
+            #                         except:
+            #                             pass
+        ctrl = ctrl.Next
+    
+            
     # 이미지 파일 목록 참조 (/output)
     for image_file in image_files:
             image_name = os.path.splitext(image_file)[0]
@@ -130,7 +207,6 @@ def insert_image_to_each_table(image_path, input_hwp_path, output_hwp_path):
                 # 기존 이미지 선택 및 width, height 얻기
                 # img_height = hwp.GetObjectHeight()
                 # img_width = hwp.GetObjectWidth()
-                
                 hwp.InsertPicture(os.path.join(image_path, image_file), True, 1, False, False, 0, image_width, image_height)
 
                 print(f"✅ [{image_name}] 표에 이미지 삽입 완료")
@@ -148,8 +224,7 @@ def insert_image_to_each_table(image_path, input_hwp_path, output_hwp_path):
     del hwp
     print(f"💾 작업 완료. 저장 경로: {output_hwp_path}")
 
-
-def insert_data_to_hwp():
+def insert_data_to_hwp(tableDict: dict):
     print("\n📊 2단계: 한글 파일 선택")
 
     try:
@@ -166,7 +241,7 @@ def insert_data_to_hwp():
             print("❌ HWP 파일이 선택되지 않았습니다.")
             sys.exit(1) 
 
-        insert_image_to_each_table(get_absolute_path('./output'), hwp_path, save_path)
+        insert_image_to_each_table(get_absolute_path('./output'), hwp_path, save_path, tableDict)
 
     except Exception as e:
         print(f"❌ 한글 파일 삽입 실패: {e}")
@@ -180,13 +255,13 @@ def main():
     # 1. 엑셀 파일에서 데이터 추출
     # - 차트 데이터 추출
     # - 이미지 추출
-    export_excel_data()
+    tableDict = export_excel_data()
     
     # 2. 한글 파일에 데이터 삽입
-    insert_data_to_hwp()
+    insert_data_to_hwp(tableDict)
 
     # 3. 이미지 파일 삭제
-    delete_files_by_extension('./output', '.png')
+    # delete_files_by_extension('./output', '.png')
 
     print("\n✅ 작업이 완료되었습니다.")
     print("=" * 60)
